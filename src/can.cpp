@@ -16,7 +16,11 @@
 
 using namespace wlp;
 
-canbus::canbus(const char *iface) : ifname(iface) {}
+canbus::canbus(const char *iface) : ifname(iface), can_sockfd(-1) {}
+canbus::~canbus() {
+    if(can_sockfd != -1)
+        close(can_sockfd);
+}
 
 const char *debug_lvls[] = {"", "ERROR", "WARN", "INFO"};
 

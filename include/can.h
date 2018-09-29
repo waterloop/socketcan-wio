@@ -17,6 +17,7 @@ namespace wlp {
     class canbus {
     public:
         canbus(const char *ifname);
+        ~canbus();
 
         // Initialize
         bool begin();
