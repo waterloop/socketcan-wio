@@ -14,35 +14,35 @@
 #include <linux/can.h>
 
 namespace wlp {
-	class canbus {
-	public:
-		canbus(const char *ifname);
+    class canbus {
+    public:
+        canbus(const char *ifname);
 
-		// Initialize
-		bool begin();
+        // Initialize
+        bool begin();
 
-		// Send a CAN frame
-		bool send(uint32_t id, uint8_t *arr, uint8_t len, bool id_ext = true);
+        // Send a CAN frame
+        bool send(uint32_t id, uint8_t *arr, uint8_t len, bool id_ext = true);
 
-		// Send a CAN remote request
-		bool request(uint32_t id, uint8_t len, bool id_ext = true);
+        // Send a CAN remote request
+        bool request(uint32_t id, uint8_t len, bool id_ext = true);
 
-		// Receive a CAN frame
-		bool recv(uint32_t *id, uint8_t *data = NULL, uint8_t *len = NULL, bool *remote_req = NULL, bool *id_ext = NULL);
+        // Receive a CAN frame
+        bool recv(uint32_t *id, uint8_t *data = NULL, uint8_t *len = NULL, bool *remote_req = NULL, bool *id_ext = NULL);
 
-		// Set CAN filter
-		bool filter(can_filter *filters, size_t nfilters);
-	private:
-		template<int level>
-		void canbus_log(const char *msg);
+        // Set CAN filter
+        bool filter(can_filter *filters, size_t nfilters);
+    private:
+        template<int level>
+        void canbus_log(const char *msg);
 
-		void canbus_errno(const char *msg);
+        void canbus_errno(const char *msg);
 
-		bool check_id(uint8_t id, bool id_ext);
+        bool check_id(uint8_t id, bool id_ext);
 
-		const char *ifname;
-		int can_sockfd;
-	};
+        const char *ifname;
+        int can_sockfd;
+    };
 }
 
 #endif
