@@ -1,16 +1,14 @@
 #ifndef CAN_H
 #define CAN_H
 
-#include <stdint.h>
-
-#ifndef DEBUG_LEVEL
-#define DEBUG_LEVEL 3
-#endif
-
 #define CANBUS_ERR 1
 #define CANBUS_WARN 2
 #define CANBUS_INFO 3
 
+// TODO allow DEBUG_LEVEL to be configured outside of library
+#define DEBUG_LEVEL CANBUS_INFO
+
+#include <stdint.h>
 #include <linux/can.h>
 
 namespace wlp {
@@ -39,7 +37,7 @@ namespace wlp {
 
         void canbus_errno(const char *msg);
 
-        bool check_id(uint8_t id, bool id_ext);
+        bool check_id(uint32_t id, bool id_ext);
 
         const char *ifname;
         int can_sockfd;

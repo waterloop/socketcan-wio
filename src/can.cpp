@@ -60,6 +60,8 @@ bool canbus::begin() {
         return false;
     }
 
+    canbus_log<CANBUS_INFO>("socket opened");
+
     return true;
 }
 
@@ -90,6 +92,7 @@ bool canbus::send(uint32_t id, uint8_t *arr, uint8_t len, bool id_ext) {
         canbus_log<CANBUS_ERR>("incomplete write");
         return false;
     }
+
     return true;
 }
 
@@ -128,6 +131,9 @@ bool canbus::filter(can_filter *filters, size_t nfilters) {
         canbus_errno("setsockopt filter failed");
         return false;
     }
+
+    canbus_log<CANBUS_INFO>("Filter changed");
+
     return true;
 }
 
@@ -164,8 +170,7 @@ bool canbus::recv(uint32_t *id, uint8_t *data, uint8_t *len, bool *remote_req, b
     return true;
 }
 
-bool canbus::check_id(uint8_t id, bool id_ext) {
-    return true;
+bool canbus::check_id(uint32_t id, bool id_ext) {
     if(id_ext) {
         return !(id & ~CAN_EFF_MASK);
     } else {
