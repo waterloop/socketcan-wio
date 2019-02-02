@@ -16,6 +16,10 @@ using namespace wlp;
 
 uint32_t serial;
 
+bool is_slave = true;
+
+uint64_t last_slave_pkt;
+
 int get_serial() {
 	int fd = open("/dev/vcio", 0);
 	if (fd == -1)
@@ -51,6 +55,22 @@ int get_serial() {
 	return property[5];
 }
 
+uint64_t get_time() {
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return ts.tv_sec * 1000000000 + ts.tv_nsec;
+}
+
+void timer_thread() {
+	if(get_time() - last_slave_pkt > 100000000) {
+		if(is_slave) {
+			is_slave = false;
+			printf("Setting as master: packet timed out\n");
+		}
+	}
+	usleep(1000);
+}
+
 void read_thread(canbus *bus) {
     uint32_t id;
     uint8_t data[8];
@@ -65,7 +85,11 @@ void read_thread(canbus *bus) {
 			uint32_t remote_serial = *(uint32_t *) data;
 			printf("Remote serial received: %x\n", remote_serial);
 			if(remote_serial < serial) {
-				printf("Setting as slave\n");
+				last_slave_pkt = get_time();
+				if(!is_slave) {
+					is_slave = true;
+					printf("Setting as slave: lower serial detected\n");
+				}
 			}
 		}
     }
@@ -82,7 +106,9 @@ int main() {
         return 1;
     }
 
+	last_slave_pkt = get_time();
 	std::thread thread(read_thread, &bus);
+	std::thread tthread(timer_thread);
 
 	while(true) {
 		if(!bus.send(64, (uint8_t *) &serial, 4)) {
