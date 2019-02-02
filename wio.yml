@@ -14,4 +14,6 @@ targets:
   tests:
     src: tests
     platform: native
+    linker_flags:
+    - pthread
 
