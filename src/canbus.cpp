@@ -12,7 +12,7 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
-#include "can.h"
+#include "canbus.h"
 
 using namespace wlp;
 
