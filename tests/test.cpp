@@ -62,13 +62,15 @@ uint64_t get_time() {
 }
 
 void timer_thread() {
-	if(get_time() - last_slave_pkt > 100000000) {
-		if(is_slave) {
-			is_slave = false;
-			printf("Setting as master: packet timed out\n");
+	while(true) {
+		if(get_time() - last_slave_pkt > 100000000) {
+			if(is_slave) {
+				is_slave = false;
+				printf("Setting as master: packet timed out\n");
+			}
 		}
+		usleep(1000);
 	}
-	usleep(1000);
 }
 
 void read_thread(canbus *bus) {
@@ -83,12 +85,11 @@ void read_thread(canbus *bus) {
         }
 		if(id == 64) {
 			uint32_t remote_serial = *(uint32_t *) data;
-			printf("Remote serial received: %x\n", remote_serial);
 			if(remote_serial < serial) {
 				last_slave_pkt = get_time();
 				if(!is_slave) {
 					is_slave = true;
-					printf("Setting as slave: lower serial detected\n");
+					printf("Setting as slave: lower serial detected: %x\n", remote_serial);
 				}
 			}
 		}
