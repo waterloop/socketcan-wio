@@ -83,7 +83,11 @@ bool canbus::send(uint32_t id, uint8_t *arr, uint8_t len, bool id_ext) {
     frame.can_dlc = len;
     memcpy(frame.data, arr, len);
 
-    int ret = write(can_sockfd, &frame, sizeof(can_frame));
+    int ret;
+	do {
+		ret = write(can_sockfd, &frame, sizeof(can_frame));
+	} while(ret < 0 && errno == ENOBUFS);
+
     if(ret < 0) {
         canbus_errno("write failed");
         return false;
@@ -114,7 +118,11 @@ bool canbus::request(uint32_t id, uint8_t len, bool id_ext) {
     }
     frame.can_dlc = len;
 
-    int ret = write(can_sockfd, &frame, sizeof(can_frame));
+	int ret;
+	do {
+		ret = write(can_sockfd, &frame, sizeof(can_frame));
+	} while(ret < 0 && errno == ENOBUFS);
+
     if(ret < 0) {
         canbus_errno("write failed");
         return false;

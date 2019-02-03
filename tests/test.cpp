@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <mutex>
 
 #include <sys/ioctl.h>
 
@@ -16,9 +17,11 @@ using namespace wlp;
 
 uint32_t serial;
 
-bool is_slave = true;
+volatile bool is_slave = true;
 
-uint64_t last_slave_pkt;
+volatile uint64_t last_slave_pkt;
+
+std::mutex mut;
 
 int get_serial() {
 	int fd = open("/dev/vcio", 0);
@@ -58,12 +61,15 @@ int get_serial() {
 uint64_t get_time() {
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return ts.tv_sec * 1000000000 + ts.tv_nsec;
+	return ts.tv_sec * 1000000000LLU + ts.tv_nsec;
 }
 
 void timer_thread() {
 	while(true) {
-		if(get_time() - last_slave_pkt > 100000000) {
+		mut.lock();
+		uint64_t tdiff = get_time() - last_slave_pkt;
+		mut.unlock();
+		if(tdiff > 100000000) {
 			if(is_slave) {
 				is_slave = false;
 				printf("Setting as master: packet timed out\n");
@@ -86,7 +92,9 @@ void read_thread(canbus *bus) {
 		if(id == 64) {
 			uint32_t remote_serial = *(uint32_t *) data;
 			if(remote_serial < serial) {
+				mut.lock();
 				last_slave_pkt = get_time();
+				mut.unlock();
 				if(!is_slave) {
 					is_slave = true;
 					printf("Setting as slave: lower serial detected: %x\n", remote_serial);
@@ -107,7 +115,11 @@ int main() {
         return 1;
     }
 
+	printf("Starting as slave\n");
+
+	mut.lock();
 	last_slave_pkt = get_time();
+	mut.unlock();
 	std::thread thread(read_thread, &bus);
 	std::thread tthread(timer_thread);
 
