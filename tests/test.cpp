@@ -12,17 +12,9 @@
 
 #include "canbus.h"
 
-#include <MCP2515.h>
-#include <Wlp/Canbus.h>
-#include <Wlp/CanbusDriver.h>
-
 using namespace wlp;
 
 uint32_t serial;
-
-volatile MCP2515 bus();
-
-volatile Packet p{};
 
 volatile bool is_slave = true;
 
@@ -100,15 +92,6 @@ void read_thread(canbus *bus) {
   }
 }
 
-void send_to_arduino(MCP2515 &bus, Packet &p) {
-  uint8_t buffer = packet::send(bus, p);
-  if (buffer) {
-    printf("Sent packet to Arduino");
-    return;
-  }
-  printf("Packet missed");
-}
-
 int main() {
   serial = get_serial();
 
@@ -128,10 +111,10 @@ int main() {
   std::thread tthread(timer_thread);
 
   while (true) {
-    if (!bus.send(64, (uint8_t *)&serial, 4)) {
+    uint8_t buf[8];   // this is the buffer where some data is stored already
+    if (!bus.send(0x006, buf, sizeof(buf))) {
       return 1;
     }
-    send_to_arduino(bus, p);
     usleep(10000);
   }
 

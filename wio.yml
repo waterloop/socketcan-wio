@@ -17,7 +17,3 @@ targets:
     linker_flags:
     - pthread
 
-dependencies:
-  can-packet:
-    version: 1.0.1
-
