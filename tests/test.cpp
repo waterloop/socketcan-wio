@@ -77,7 +77,7 @@ void read_thread(canbus *bus) {
       return;
     }
     if (id == 64) {
-      uint32_t remote_serial = *(uint32_t *)data;
+      uint32_t remote_serial = *(uint32_t *) data;
       if (remote_serial < serial) {
         mut.lock();
         last_slave_pkt = get_time();

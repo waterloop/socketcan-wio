@@ -1,11 +1,11 @@
 type: pkg
 
 project:
-  name: canbus
-  version: 0.0.1
+  name: socketcan-wio
+  version: 1.0.0
   keywords:
-  - wio
-  - pkg
+    - wio
+    - pkg
   compile_options:
     wio_version: 0.4.0
     default_target: tests
@@ -15,5 +15,10 @@ targets:
     src: tests
     platform: native
     linker_flags:
-    - pthread
+      - pthread
 
+libraries:
+  Threads:
+    cmake_package: true
+    use_imported_targets: true
+    required: true
